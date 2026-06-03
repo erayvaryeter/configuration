@@ -34,7 +34,7 @@ std::shared_ptr<IConfiguration> CreateRiasXmlFile() {
 				platform3->appendNode("LOCATION", "ADANA");
 			}
 		}
-		ConfigurationFile::saveToFile(riasXmlFile, "D:/config_test/RiasXmlFile.xml");
+		ConfigurationFile::saveToFile(riasXmlFile, "D:/config_test/Riax.xml");
 	}
 	return riasXmlFile;
 }
@@ -71,7 +71,7 @@ std::shared_ptr<IConfiguration> CreateRfksJsonFile() {
 				platform3->appendNode("LOCATION", "VAN");
 			}
 		}
-		ConfigurationFile::saveToFile(rfksJsonFile, "D:/config_test/RfksJsonFile.json");
+		ConfigurationFile::saveToFile(rfksJsonFile, "D:/config_test/Rfks.json");
 	}
 	return rfksJsonFile;
 }
@@ -108,13 +108,13 @@ std::shared_ptr<IConfiguration> CreateCmdsYamlFile() {
 				platform3->appendNode("LOCATION", "MARDIN");
 			}
 		}
-		ConfigurationFile::saveToFile(cmdsYamlFile, "D:/config_test/CmdsYamlFile.yaml");
+		ConfigurationFile::saveToFile(cmdsYamlFile, "D:/config_test/Cmds.yaml");
 	}
 	return cmdsYamlFile;
 }
 
 void updateRiasJsonFile() {
-	auto riasJsonFile = ConfigurationFile::loadFromFile("D:/config_test/RiasJsonFile.json", ConfigType::JSON);
+	auto riasJsonFile = ConfigurationFile::loadFromFile("D:/config_test/Rias.json", ConfigType::JSON);
 	if (riasJsonFile) {
 		auto riasGroup = riasJsonFile->getSubNode("SUMER.RIAS");
 		if (riasGroup) {
@@ -156,13 +156,13 @@ void updateRiasJsonFile() {
 				}
 			}
 		}
-		ConfigurationFile::saveToFile(riasJsonFile, "D:/config_test/RiasJsonFileUpdated.json");
+		ConfigurationFile::saveToFile(riasJsonFile, "D:/config_test/RiasUpdated.json");
 	}
 	std::cout << std::endl;
 }
 
 void updateRfksYamlFile() {
-	auto rfksYamlFile = ConfigurationFile::loadFromFile("D:/config_test/RfksYamlFile.yaml", ConfigType::YAML);
+	auto rfksYamlFile = ConfigurationFile::loadFromFile("D:/config_test/Rfks.yaml", ConfigType::YAML);
 	if (rfksYamlFile) {
 		auto rfksGroup = rfksYamlFile->getSubNode("SUMER.RFKS");
 		if (rfksGroup) {
@@ -204,13 +204,13 @@ void updateRfksYamlFile() {
 				}
 			}
 		}
-		ConfigurationFile::saveToFile(rfksYamlFile, "D:/config_test/RfksYamlFileUpdated.yaml");
+		ConfigurationFile::saveToFile(rfksYamlFile, "D:/config_test/RfksUpdated.yaml");
 	}
 	std::cout << std::endl;
 }
 
 void updateCmdsXmlFile() {
-	auto cmdsXmlFile = ConfigurationFile::loadFromFile("D:/config_test/CmdsXmlFile.xml", ConfigType::XML);
+	auto cmdsXmlFile = ConfigurationFile::loadFromFile("D:/config_test/Cmds.xml", ConfigType::XML);
 	if (cmdsXmlFile) {
 		auto cmdsGroup = cmdsXmlFile->getSubNode("SUMER.CMDS");
 		if (cmdsGroup) {
@@ -252,8 +252,26 @@ void updateCmdsXmlFile() {
 				}
 			}
 		}
-		ConfigurationFile::saveToFile(cmdsXmlFile, "D:/config_test/CmdsXmlFileUpdated.xml");
+		ConfigurationFile::saveToFile(cmdsXmlFile, "D:/config_test/CmdsUpdated.xml");
 	}
+}
+
+void appendAllNodesAndConvertSave(std::shared_ptr<IConfiguration>& riasXmlFile,
+	std::shared_ptr<IConfiguration>& rfksJsonFile,
+	std::shared_ptr<IConfiguration>& cmdsYamlFile) 
+{
+	// get related nodes
+	auto xmlSumerNode = riasXmlFile->getSubNode("SUMER");
+	auto jsonRfksNode = rfksJsonFile->getSubNode("SUMER.RFKS");
+	auto yamlCmdsNode = cmdsYamlFile->getSubNode("SUMER.CMDS");
+	// append rfks and cmds nodes to sumer node of rias xml file
+	xmlSumerNode->appendSubNode("RFKS", jsonRfksNode);
+	xmlSumerNode->appendSubNode("CMDS", yamlCmdsNode);
+	// save the appended rias xml file
+	ConfigurationFile::saveToFile(riasXmlFile, "D:/config_test/AllSystems.xml");
+	// convert and save to json and yaml
+	ConfigurationFile::convertAndSave(riasXmlFile, ConfigType::JSON, "D:/config_test/AllSystems.json");
+	ConfigurationFile::convertAndSave(riasXmlFile, ConfigType::YAML, "D:/config_test/AllSystems.yaml");
 }
 
 int main() {
@@ -268,16 +286,16 @@ int main() {
 	auto cmdsYamlFile = CreateCmdsYamlFile();
 
 	// convert rias xml to rias json file and rias yaml file
-	ConfigurationFile::convertAndSave(riasXmlFile, ConfigType::JSON, "D:/config_test/RiasJsonFile.json");
-	ConfigurationFile::convertAndSave(riasXmlFile, ConfigType::YAML, "D:/config_test/RiasYamlFile.yaml");
+	ConfigurationFile::convertAndSave(riasXmlFile, ConfigType::JSON, "D:/config_test/Rias.json");
+	ConfigurationFile::convertAndSave(riasXmlFile, ConfigType::YAML, "D:/config_test/Rias.yaml");
 	
 	// convert rfks json to rfks xml file and rfks yaml file
-	ConfigurationFile::convertAndSave(rfksJsonFile, ConfigType::XML, "D:/config_test/RfksXmlFile.xml");
-	ConfigurationFile::convertAndSave(rfksJsonFile, ConfigType::YAML, "D:/config_test/RfksYamlFile.yaml");
+	ConfigurationFile::convertAndSave(rfksJsonFile, ConfigType::XML, "D:/config_test/Rfks.xml");
+	ConfigurationFile::convertAndSave(rfksJsonFile, ConfigType::YAML, "D:/config_test/Rfks.yaml");
 
 	// convert cmds yaml to cmds xml and cmds json file
-	ConfigurationFile::convertAndSave(cmdsYamlFile, ConfigType::XML, "D:/config_test/CmdsXmlFile.xml");
-	ConfigurationFile::convertAndSave(cmdsYamlFile, ConfigType::JSON, "D:/config_test/CmdsJsonFile.json");
+	ConfigurationFile::convertAndSave(cmdsYamlFile, ConfigType::XML, "D:/config_test/Cmds.xml");
+	ConfigurationFile::convertAndSave(cmdsYamlFile, ConfigType::JSON, "D:/config_test/Cmds.json");
 	
 	// update rias json file
 	updateRiasJsonFile();
@@ -288,5 +306,8 @@ int main() {
 	// update cmds xml file
 	updateCmdsXmlFile();
 	
+	// append all nodes to each other & convert and save to all formats
+	appendAllNodesAndConvertSave(riasXmlFile, rfksJsonFile, cmdsYamlFile);
+
 	return 0;
 }

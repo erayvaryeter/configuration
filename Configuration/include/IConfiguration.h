@@ -29,10 +29,13 @@ public:
     template<typename T>
     std::shared_ptr<IConfiguration> appendNode(const std::string& name, const T& value);
     std::shared_ptr<IConfiguration> appendNode(const std::string& name, const char* value) { return this->appendNode(name, std::string(value)); }
+    std::shared_ptr<IConfiguration> appendSubNode(const std::string& name, std::shared_ptr<IConfiguration> subNode);
     std::shared_ptr<IConfiguration> createGroup(const std::string& name);
 
+    std::string getName() const { return m_nodeName; }
+
 private:
-    explicit IConfiguration(std::unique_ptr<IConfigurationImpl> impl);
+    explicit IConfiguration(std::unique_ptr<IConfigurationImpl> impl, std::string name = "");
     friend class ConfigurationFile;
 
     std::string to_string_helper(const std::string& value) { return value; }
@@ -43,6 +46,7 @@ private:
     std::string to_string_helper(const T& value);
 
     std::unique_ptr<IConfigurationImpl> pimpl;
+    std::string m_nodeName;
 };
 
 class ConfigurationFile {
@@ -56,6 +60,7 @@ public:
     friend class XMLConfigurationImpl;
     friend class YAMLConfigurationImpl;
     friend class JSONConfigurationImpl;
+    friend class IConfiguration;
 
 private:
     static void recursiveCopy(const std::shared_ptr<IConfiguration>& src, std::shared_ptr<IConfiguration>& dst, int depth = 0);

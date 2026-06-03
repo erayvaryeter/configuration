@@ -7,7 +7,9 @@
 #include <fstream>
 #include <iostream>
 
-IConfiguration::IConfiguration(std::unique_ptr<IConfigurationImpl> impl) : pimpl(std::move(impl)) {}
+IConfiguration::IConfiguration(std::unique_ptr<IConfigurationImpl> impl, std::string name) 
+    : pimpl(std::move(impl)), m_nodeName(std::move(name)) {}
+    
 IConfiguration::~IConfiguration() = default;
 
 std::shared_ptr<IConfiguration> IConfiguration::getSubNode(const std::string & path) {
@@ -72,6 +74,16 @@ std::shared_ptr<IConfiguration> IConfiguration::appendNode(const std::string& na
     return std::shared_ptr<IConfiguration>(new IConfiguration(std::move(childImpl)));
 }
 
+std::shared_ptr<IConfiguration> IConfiguration::appendSubNode(const std::string& name, std::shared_ptr<IConfiguration> subNode) {
+    if (!subNode) return nullptr;
+
+    auto dstChild = this->createGroup(name);
+    if (dstChild) {
+        ConfigurationFile::recursiveCopy(subNode, dstChild);
+    }
+    return dstChild;
+}
+
 std::shared_ptr<IConfiguration> IConfiguration::createGroup(const std::string& name) {
     auto childImpl = pimpl->createGroupInternal(name);
     return std::shared_ptr<IConfiguration>(new IConfiguration(std::move(childImpl)));
@@ -112,7 +124,7 @@ std::shared_ptr<IConfiguration> ConfigurationFile::loadFromBuffer(const std::str
 
     if (!concreteImpl) return nullptr;
 
-    return std::shared_ptr<IConfiguration>(new IConfiguration(std::move(concreteImpl)));
+    return std::shared_ptr<IConfiguration>(new IConfiguration(std::move(concreteImpl), ""));
 }
 
 std::shared_ptr<IConfiguration> ConfigurationFile::createFile(ConfigType type, const std::string& rootName) {
